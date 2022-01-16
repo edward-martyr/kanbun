@@ -1,0 +1,27 @@
+% example text from https://phesoca.com/kanbun-html/
+\documentclass{ltjtarticle}
+
+\usepackage[match]{luatexja-fontspec}
+\setmainjfont{Kozuka Mincho Pr6N}
+
+\newlength\myzw
+\setlength\myzw{2.25\zw}
+\usepackage[kumi=beta, unit=\myzw, yokoaki=3.5]{kanbun}
+
+\usepackage[margin=0pt]{geometry}
+
+\usepackage{xcolor}
+
+\Kanbun
+初メテ，帝ノ母劉貴人ハ賜(たま)ハリ[レ]死ヲ，太祖ハ告ゲ[レ]帝ニ曰ハク「昔漢武帝ハ將‹し›«テ»ニ[レ]立タセント[二]其ノ子ヲ[一]而殺シ[二]其ノ母ヲ[一]，不[下]令(し)メ[三]婦人ヲ後ロニ與(あづか)ラ[二]國政ニ[一]，使(し)メ[中]外家ヲ為(な)サ[上レ]亂ヲ。汝當ニ‹べ›«ク»[二]繼統ス[一]，故ニ吾レ遠クシテ同ズルコト[二]漢武ト[一]，為(た)リ[二]長久之計[一]。」帝素ヨリ純孝ナリ，哀シク泣キ不[レ]能ハ[二]自ラ勝ツコト[一]，太祖怒ル[レ]之レヲ。帝ハ還リ[レ]宮ニ，哀シク不[二]自ラ止マ[一]，日夜ニシテ號泣ス。太祖知リテ而又タ召ス[レ]之レヲ。帝欲シ[レ]入ラント，左右曰ハク「孝子事ヘバ[レ]父ニ，小杖則チ受ケ，大杖避ク[レ]之レヲ。今陛下ノ怒ルコト盛ンナリ，入レバ或イハ不測ナリ，陷ラス[二]帝ヲ於不義ニ[一]。不[レ]如カ[二]且(しばら)ク出ヅルニ[一]，待チテ[二]怒リノ解クルヲ[一]而進ムコト，不ル[レ]晚カラ也。」帝ハ懼レ，從ヒ[レ]之レニ，乃チ游行シ逃グ[二]於外ニ[一]。
+\EndKanbun
+
+\begin{document}
+\color[HTML]{e0e0e0}
+\pagestyle{empty}
+\vspace*{\fill}
+\begin{minipage}{0.5\pageheight}
+    \printkanbun
+\end{minipage}
+\vspace*{\fill}
+\end{document}
