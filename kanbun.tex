@@ -29,10 +29,20 @@
     {\lstset{
         basicstyle=\ja{\linespread{1}}\ttfamily,
         frame=single,
-        columns=flexible,
+        columns=fullflexible,
         language=[LaTeX]TeX,
-        breaklines=true,
-        postbreak=\mbox{\textcolor{spot}{$\hookrightarrow$}\space},
+        moretexcs={
+            Kanbun,
+            EndKanbun,
+            printkanbun,
+            printkanbuncode,
+            kanbunfont,
+            furiokuri,
+            multifuriokuri,
+            ExplSyntaxOn,
+            ExplSyntaxOff,
+            kanjiunit,
+        }
     }}
     {}
 
@@ -46,7 +56,7 @@
 \defaultjfontfeatures{Scale=MatchLowercase, YokoFeatures={JFM=ja_JP/{kaiming,prop}, RawFeature={+pkna,+kern}}}
 \setmainjfont[BoldFont={*-D}]{FOT-TsukuMin Pr6N}
 \setsansjfont{Sarasa Mono J}
-\setmonojfont{Sarasa Mono J}
+\setmonojfont[Scale=MatchLowercase, YokoFeatures={JFM=prop, RawFeature={+kern}}]{Sarasa Mono J}
 \setmainfont{Minion Pro}
 \setsansfont{Myriad Pro}
 \setmonofont{Sarasa Mono J}
@@ -127,7 +137,7 @@
 \ja{\sty{kanbun}パッケージでは他の漢文訓読の\LaTeX{}パッケージ（例えば \sty{gckanbun}）と同じく、手動で漢文訓読の各要素に対応するマクロを入力できる。}
 
 \en{More importantly, it accepts input with light markup in the ``\emph{kanbun} annotation'' form when used with \LuaLaTeX, which allows typesetting \emph{kanbun-kundoku} paragraphs efficiently\footnote{The idea comes from \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca, which is a JavaScript and \textsc{css} implementation.}.}
-\ja{更に重要なことには、 \LuaLaTeX{}で実行すれば、軽量マークアップの「漢文アノテーション」で容易く効率的に漢文訓読を組版することが可能となっている\footnote{JavaScriptとCSSによって実行するUntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} が参考となっていた。}。}
+\ja{更に重要なことには、 \LuaLaTeX{}で実行すれば、軽量マークアップの「漢文アノテーション」で容易く効率的に漢文訓読を組版することが可能となっている\footnote{JavaScriptやCSSによって実行するUntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} が参考となっていた。}。}
 
 
 \section{\en{Basic example with \LuaLaTeX}\ja{\LuaLaTeX{}での簡単な実例}}
@@ -210,7 +220,7 @@
 
     \optitem[]{okuriintrusion}{\prm{\en{ratio}\ja{比}}}
     \en{Sets the intrusion of \emph{okurigana} (how much \emph{okurigana} should be vertically tucked into the space of \emph{kanji}) with respect to the size of ruby texts, if that does not cause an overlap with \emph{furigana}. Default: \verb|1|.}
-    \ja{ルビ文字のサイズに対する送り仮名\ruby[pre=0.5,post=1]{進入量}{イントルージョン}（送り仮名を上に突かせて漢字に掛ける長さ）の割合を設定する。初期値： \verb|1|。}
+    \ja{ルビ文字のサイズに対する送仮名\ruby[pre=0.5,post=1]{進入量}{イントルージョン}（送仮名を上に突かせて漢字に掛ける長さ）の割合を設定する。初期値： \verb|1|。}
 
     \optitem[]{kumi}{\opt{aki}, \opt{beta}}
     \en{Sets whether to use \emph{aki-gumi} (typeset with uniform inter-character spacing) or \emph{beta-gumi} (typeset with no inter-character space between adjacent character frames). Or simply call \opt{aki} or \opt{beta} without \opt{kumi=}. Default: \opt{aki}. }
@@ -231,12 +241,12 @@
 \ja{漢文アノテーションの機能を使わない場合、任意の CJK 支援のあるエンジンで漢文を組版できる。例えば\XeLaTeX{} を \sty{xeCJK} パッケージと一緒に使うか、 \upLaTeX{} を \sty{utarticle} クラス或いは他の適宜なクラスと一緒に使うか、どちらも可。}
 
 \begin{ltxsyntax}
-    \cmditem{kanjiunit}\verb|{ |\cmd{furiokuri}\mprm{\en{right furigana}\ja{右の振り仮名}}\mprm{\en{right okurigana}\ja{右の送り仮名}}\verb| }|\vspace{-5pt}\\
+    \cmditem{kanjiunit}\verb|{ |\cmd{furiokuri}\mprm{\en{right furigana}\ja{右の振仮名}}\mprm{\en{right okurigana}\ja{右の送仮名}}\verb| }|\vspace{-5pt}\\
     \mprm{\en{left (top) punctuation (e.g.~`「')}\ja{左（上）の句読点（“「”など）}}\\
     \mprm{\en{kanji}\ja{漢字}}\\
     \mprm{\en{other punctuation}\ja{他の句読点}}\\
     \mprm{\en{kaeriten}\ja{返り点}}\\
-    \verb|{ |\cmd{furiokuri}\mprm{\en{left furigana}\ja{左の振り仮名}}\mprm{\en{left okurigana}\ja{左の送り仮名}}\verb| }|
+    \verb|{ |\cmd{furiokuri}\mprm{\en{left furigana}\ja{左の振仮名}}\mprm{\en{left okurigana}\ja{左の送仮名}}\verb| }|
 
     \cmditem{kanbunfont}
 
@@ -246,7 +256,7 @@
     \en{Use \cmd{multifuriokuri} instead of \cmd{furiokuri} if you are putting \emph{furigana} to multiple kanji.}
     \ja{複数個の漢字に仮名を振れば、 \cmd{furiokuri} の代わりに \cmd{multifuriokuri} を使う。}
 
-    \cmditem{multifuriokuri}\oprm{\en{length by which ruby is raised}\ja{ルビ文字を上げる長さ}}\mprm{\en{furigana}\ja{振り仮名}}\mprm{\en{okurigana}\ja{送り仮名}}
+    \cmditem{multifuriokuri}\oprm{\en{length by which ruby is raised}\ja{ルビ文字を上げる長さ}}\mprm{\en{furigana}\ja{振仮名}}\mprm{\en{okurigana}\ja{送仮名}}
 \end{ltxsyntax}
 
 \en{For example, the code}
@@ -285,10 +295,10 @@
 \en{\emph{Kanbun} annotation uses the following brackets to mark different elements in \emph{kanbun-kundoku} (as described in \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca). }
 \ja{漢文アノテーションでは下記の括弧を以って漢文訓読においての各要素を示す（UntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} を参照されたい）。}
 \begin{itemize}
-    \item \verb|( )|: \en{\emph{furigana} (}振り仮名\en{)}
-    \item \verb|{ }|: \en{\emph{okurigana} (}送り仮名\en{) (these brackets can be omitted)}\ja{（この括弧を省略しても大丈夫）}
-    \item \verb|‹ ›|: \en{\emph{furigana} (振り仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の振り仮名}
-    \item \verb|« »|: \en{\emph{okurigana} (送り仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の送り仮名}
+    \item \verb|( )|: \en{\emph{furigana} (}振仮名\en{)}
+    \item \verb|{ }|: \en{\emph{okurigana} (}送仮名\en{) (these brackets can be omitted)}\ja{（この括弧を省略しても大丈夫）}
+    \item \verb|‹ ›|: \en{\emph{furigana} (振仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の振仮名}
+    \item \verb|« »|: \en{\emph{okurigana} (送仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の送仮名}
     \item \verb|[ ]|: \en{\emph{kaeriten} (}返り点\en{)}
     \item \verb|‘ ’|: \en{multiple \emph{kanji}, potentially with \emph{tateten} inserted, as a ruby base; group ruby (グループルビ)}\ja{グループルビのベース。中に\ruby{竪|点}{たて|てん}を入れても可}
     \item \en{no annotation: \emph{kanji} (漢字) and punctuation}\ja{アノテーション無し：漢字と句読点}
@@ -313,8 +323,8 @@
     \ja{処理の結果を一部変更する、もしくは結果を\LuaTeX{}でないエンジンで使用するには、結果のマクロを \cmd{printkanbuncode} で入手して（端末に出力）、そこから作業を続けることが可能。}
 \end{ltxsyntax}
 
-\en{You can always save \cmd{printkanbun} to a macro and start a new annotated \emph{kanbun} block, as in the following example.}
-\ja{次の実例のとおり、いつでも \cmd{printkanbun} をあるマクロに保存し、新しい漢文段落を書き込み始められる。}
+\en{You can always save \cmd{printkanbun} to a macro for use later and start a new annotated \emph{kanbun} block, as in the following example.}
+\ja{次の実例のとおり、後で使えるように \cmd{printkanbun} をあるマクロに保存し、新しい漢文段落を書き込み始められる。}
 \begin{example}
 % example text from https://phesoca.com/kanbun-html/
 \documentclass{ltjtarticle}
