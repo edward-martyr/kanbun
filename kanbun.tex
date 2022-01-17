@@ -22,19 +22,17 @@
   \def\@seccntformat#1{\protect\makebox[0pt][r]{\csname the#1\endcsname\hspace{\marglistsep}}}
 \makeatother
 
-\usepackage{shortvrb}
-\MakeShortVerb{|}
+\usepackage{fancyvrb}
+\DefineShortVerb{\|}
 
 \lstnewenvironment{example}[1][]
     {\lstset{
-        basicstyle=\ttfamily,
+        basicstyle=\ja{\linespread{1}}\ttfamily,
         frame=single,
         columns=flexible,
         language=[LaTeX]TeX,
         breaklines=true,
         postbreak=\mbox{\textcolor{spot}{$\hookrightarrow$}\space},
-        % morekeywords={drawuntpoint,untpoint,linkuntpoints},
-        % escapeinside={<@}{@>},
     }}
     {}
 
@@ -43,23 +41,40 @@
     \ltjdefcharrange{11}{"2039-"203A}
     \ltjsetparameter{jacharrange={-1, +2, +3, -4, -5, +6, +7, -8, +9, +10, -11}}
 \usepackage[match]{luatexja-fontspec}
-\defaultfontfeatures{Numbers=OldStyle, Scale=MatchLowercase}
-\defaultjfontfeatures{Scale=MatchLowercase}
-\setmainjfont{Kozuka Mincho Pr6N}
+\en{\defaultfontfeatures{Numbers=OldStyle, Scale=MatchLowercase}}
+\ja{\defaultfontfeatures{Scale=MatchLowercase}}
+\defaultjfontfeatures{Scale=MatchLowercase, YokoFeatures={JFM=ja_JP/{kaiming,prop}, RawFeature={+pkna,+kern}}}
+\setmainjfont[BoldFont={*-D}]{FOT-TsukuMin Pr6N}
 \setsansjfont{Sarasa Mono J}
-\setmonojfont[YokoFeatures={JFM=prop}]{Sarasa Mono J}
+\setmonojfont{Sarasa Mono J}
 \setmainfont{Minion Pro}
 \setsansfont{Myriad Pro}
 \setmonofont{Sarasa Mono J}
-\newfontfamily{\kanbunfamily}{Kozuka Mincho Pr6N}
+
+\ja{
+    \parindent=1\zw
+    \renewcommand{\baselinestretch}{1.2}
+}
 
 \usepackage{luatexja-ruby}
-    \ltjsetruby{fontcmd=\addjfontfeature{RawFeature={+ruby}}}
+    \ltjsetruby{
+        fontcmd=\addjfontfeature{
+                YokoFeatures={RawFeature={-pkna,+ruby}},
+                TateFeatures={RawFeature={-pkna,+ruby}},
+            },
+        mode=7,
+    }
 
-\usepackage{kanbun}
+\usepackage[
+    rubyfontcmd=\addjfontfeature{
+            YokoFeatures={RawFeature={-pkna,+ruby}},
+            TateFeatures={RawFeature={-pkna,+ruby}},
+        },
+]{kanbun}
 \newcommand{\printkanbunblock}[2]{
     {
         \parindent=0pt
+        \ja{\linespread{1}}
         \vspace*{1\zw}
         \hfill
         \vbox{
@@ -84,10 +99,16 @@
 \Kanbun
 以テ[二]羅(ら)蝶(てふ)ヲ[一]作ルガ[二]漢文訓読ヲ[一]用(ため)ノ包(ぱつけーぢ)
 \EndKanbun
-\title{The \sty{kanbun} package}
+\title{\en{The \sty{kanbun} package}\ja{\sty{kanbun}パッケージ}}
 \subtitle{\normalsize\normalfont\addjfontfeature{Scale=1}\printkanbun}
-\author{Yuanhao Chen (\ruby[rubysmash=true]{陳|元|鎬}{ちん|げん|こう})}
-\date{\scshape 15 january 2022, v1.0}
+\author{
+    \en{Yuanhao Chen (\ruby[rubysmash=true]{陳|元|鎬}{ちん|げん|こう})}
+    \ja{
+        \ruby[rubysmash=true]{陳|元|鎬}{ちん|げん|こう} (Yuanhao Chen) 
+        \footnote{日本人ではないので、日本語ネイティヴの方がいらっしゃればマニュアルを書き直して下さると嬉しい。}
+    }
+}
+\date{\en{\scshape 15 january 2022, v1.0}\ja{2022年1月15日, v1.0}}
 
 
 \begin{document}
@@ -97,32 +118,21 @@
 \tl_set:Nn \kanbun_kumi { beta }
 \ExplSyntaxOff
 \maketitle
+\ja{\renewcommand{\contentsname}{目次}}
 \tableofcontents
 
 
-\section{Introduction}
-The \sty{kanbun} package, like other \emph{kanbun-kundoku} (漢文訓読) \LaTeX{} packages (such as \sty{gckanbun}), allows users to manually input macros for elements in a \emph{kanbun-kundoku} paragraph.
+\section{\en{Introduction}\ja{はじめに}}
+\en{The \sty{kanbun} package, like other \emph{kanbun-kundoku} (漢文訓読) \LaTeX{} packages (such as \sty{gckanbun}), allows users to manually input macros for elements in a \emph{kanbun-kundoku} paragraph.}
+\ja{\sty{kanbun}パッケージでは他の漢文訓読の\LaTeX{}パッケージ（例えば \sty{gckanbun}）と同じく、手動で漢文訓読の各要素に対応するマクロを入力できる。}
 
-More importantly, it accepts plain text input in the ``\emph{kanbun} annotation'' form when used with \LuaLaTeX, which allows typesetting \emph{kanbun-kundoku} paragraphs efficiently\footnote{The idea comes from \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca, which is a JavaScript and \textsc{css} implementation.}.
+\en{More importantly, it accepts input with light markup in the ``\emph{kanbun} annotation'' form when used with \LuaLaTeX, which allows typesetting \emph{kanbun-kundoku} paragraphs efficiently\footnote{The idea comes from \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca, which is a JavaScript and \textsc{css} implementation.}.}
+\ja{更に重要なことには、 \LuaLaTeX{}で実行すれば、軽量マークアップの「漢文アノテーション」で容易く効率的に漢文訓読を組版することが可能となっている\footnote{JavaScriptとCSSによって実行するUntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} が参考となっていた。}。}
 
 
-\section{Basic example with \LuaLaTeX}
-As seen in the following example, typesetting a \emph{kanbun-kundoku} paragraph with the \sty{kanbun} package requires only light annotations --- it automatically transforms the annotated plain text into \LaTeX{} macros through Lua, rather than having users type in macros themselves.
-
-\ExplSyntaxOn
-\tl_set:Nn \kanbun_tateaki { 1 }
-\tl_set:Nn \kanbun_kumi { aki }
-\ExplSyntaxOff
-\Kanbun
-月落チ烏啼キテ霜満ツ[レ]天ニ，
-江楓漁火対ス[二]愁眠ニ[一]。
-姑(こ)蘇(そ)城外ノ寒山寺，
-夜半ノ鐘声到ル[二]客船ニ[一]。
-\EndKanbun
-
-\penalty0
-\printkanbunblock{13}{\printkanbun}
-\vspace{-2\zw}
+\section{\en{Basic example with \LuaLaTeX}\ja{\LuaLaTeX{}での簡単な実例}}
+\en{As seen in the following example, typesetting a \emph{kanbun-kundoku} paragraph with the \sty{kanbun} package requires only light annotations --- it automatically transforms the annotated plain text into \LaTeX{} macros through Lua, rather than having users type in macros themselves.}
+\ja{次の実例のとおり、 \sty{kanbun}パッケージを使えばただの軽量なアノテーションで漢文訓読を組版できる。手動でマクロを入力するではなく、プログラムが自動的にアノテーションのあるプレーンテキストをLuaで処理して\LaTeX{}マクロに変更する。}
 
 \begin{example}
 \documentclass{ltjtarticle}
@@ -138,73 +148,109 @@ As seen in the following example, typesetting a \emph{kanbun-kundoku} paragraph 
 \end{document}
 \end{example}
 
-Note that if you want to use this functionality, you have to run this document with \LuaLaTeX.
+\ExplSyntaxOn
+\tl_set:Nn \kanbun_tateaki { 1 }
+\tl_set:Nn \kanbun_kumi { aki }
+\ExplSyntaxOff
+\Kanbun
+月落チ烏啼キテ霜満ツ[レ]天ニ，
+江楓漁火対ス[二]愁眠ニ[一]。
+姑(こ)蘇(そ)城外ノ寒山寺，
+夜半ノ鐘声到ル[二]客船ニ[一]。
+\EndKanbun
+
+\allowbreak
+\printkanbunblock{13}{\printkanbun}
+\vspace{-1.5\zw}
+
+\en{Note that if you want to use this functionality, you have to run this document with \LuaLaTeX.}
+\ja{この機能を使う場合、必ず\LuaLaTeX{}で実行してください。}
 
 
-\section{Usage}
+\section{\en{Usage}\ja{使用方法}}
 
-\subsection{Package options}
-Load the package with
+\subsection{\en{Package options}\ja{パッケージのオプション}}
+\en{Load the package with}
+\ja{このパッケージを読み込むには}
+\nobreak
 \begin{ltxsyntax}
-    \cmditem{usepackage}\oprm{\sty{kanbun} options}|{kanbun}|
+    \cmditem{usepackage}\oprm{\en{\sty{kanbun} options}\ja{ \sty{kanbun}のオプション}}|{kanbun}|
 \end{ltxsyntax}
 
-This package provides a variety of customisable features in \emph{kanbun-kundoku}.
+\en{This package provides a variety of customisable features in \emph{kanbun-kundoku}.}
+\ja{以下のオプションでさまざまな漢文訓読においてのパラメーターを設定できる。}
 
 \begin{optionlist}
-    \optitem[]{scale}{\prm{ratio}}
-    Sets the ratio of the size of \emph{kanji} to that of ruby texts. Default: \verb|2|.
+    \optitem[]{scale}{\prm{\en{ratio}\ja{比}}}
+    \en{Sets the ratio of the size of \emph{kanji} to that of ruby texts. Default: \verb|2|.}
+    \ja{ルビ文字のサイズに対する漢字のサイズの割合を設定する。初期値： \verb|2|。}
     
-    \optitem[]{fontcmd}{\prm{font command}}
-    Sets the font command to use for \emph{kanji}. If \sty{luatexja-fontspec} is loaded, it is set default to \verb|\addjfontfeatures{RawFeature={+trad}}| to obtain traditional \emph{kanji} if applicable.
+    \SaveVerb{fontcmd}|\addjfontfeatures{RawFeature={+trad}}|
+    \optitem[]{fontcmd}{\prm{\en{font command}\ja{書体のコマンド}}}
+    \en{Sets the font command to use for \emph{kanji}. If \sty{luatexja-fontspec} is loaded, it is set default to \UseVerb{fontcmd} to obtain traditional \emph{kanji} if applicable.}
+    \ja{漢字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれている場合、 \UseVerb{fontcmd} に初期化されて、旧字体のグリフに変更する。}
 
-    \optitem[]{rubyfontcmd}{\prm{font command}}
-    Sets the font command to use for ruby texts. If \sty{luatexja-fontspec} is loaded, it is set default to \verb|\addjfontfeatures{RawFeature={+ruby}}| to obtain ruby glyphs when applicable.
+    \SaveVerb{rubyfontcmd}|\addjfontfeatures{RawFeature={+ruby}}|
+    \optitem[]{rubyfontcmd}{\prm{\en{font command}\ja{書体のコマンド}}}
+    \en{Sets the font command to use for ruby texts. If \sty{luatexja-fontspec} is loaded, it is set default to \UseVerb{rubyfontcmd} to obtain ruby glyphs when applicable.}
+    \ja{ルビ文字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれている場合、 \UseVerb{rubyfontcmd} に初期化されて、ルビグリフに変更する。}
 
-    \optitem[]{unit}{\prm{length}}
-    Sets the base size (size of \emph{kanji}). Default: \verb|\kanbun_zw|, which is initialised as \verb|1em|.
+    \SaveVerb{unit}|\kanbun_zw|
+    \optitem[]{unit}{\prm{\en{length}\ja{長さ}}}
+    \en{Sets the base size (size of \emph{kanji}). Default: \UseVerb{unit}, which is initialised as \verb|1em|.}
+    \ja{漢字の基本サイズを設定する。初期値： \UseVerb{unit}、つまり \verb|1em|。}
 
-    \optitem[]{yokoaki}{\prm{ratio}}
-    Sets the horizontal space between \emph{kanji} with respect to the size of ruby texts. Default: \verb|2|. 
+    \optitem[]{yokoaki}{\prm{\en{ratio}\ja{比}}}
+    \en{Sets the horizontal space between \emph{kanji} with respect to the size of ruby texts. Default: \verb|2|.}
+    \ja{ルビ文字のサイズに対するインテルの幅の割合を設定する。初期値： \verb|2|。}
 
-    \optitem[]{tateaki}{\prm{ratio}}
-    Sets the vertical space between \emph{kanji} with respect to the size of ruby texts. Default: \verb|2|. 
+    \optitem[]{tateaki}{\prm{\en{ratio}\ja{比}}}
+    \en{Sets the vertical space between \emph{kanji} with respect to the size of ruby texts. Default: \verb|2|.}
+    \ja{ルビ文字のサイズに対する漢字間のアキ量の割合を設定する。初期値： \verb|2|。}
 
-    \optitem[]{okuriprotrusion}{\prm{ratio}}
-    Sets how much \emph{okurigana} should be vertically tucked into the space of \emph{kanji} with respect to the size of ruby texts, if that does not cause an overlap with \emph{furigana}. Default: \verb|1|.
+    \optitem[]{okuriintrusion}{\prm{\en{ratio}\ja{比}}}
+    \en{Sets the intrusion of \emph{okurigana} (how much \emph{okurigana} should be vertically tucked into the space of \emph{kanji}) with respect to the size of ruby texts, if that does not cause an overlap with \emph{furigana}. Default: \verb|1|.}
+    \ja{ルビ文字のサイズに対する送り仮名\ruby[pre=0.5,post=1]{進入量}{イントルージョン}（送り仮名を上に突かせて漢字に掛ける長さ）の割合を設定する。初期値： \verb|1|。}
 
     \optitem[]{kumi}{\opt{aki}, \opt{beta}}
-    Sets whether to use \emph{aki-gumi} (typeset with uniform inter-character spacing) or \emph{beta-gumi} (typeset with no inter-character space between adjacent character frames). Or simply call \opt{aki} or \opt{beta} without \opt{kumi=}. Default: \opt{aki}. 
+    \en{Sets whether to use \emph{aki-gumi} (typeset with uniform inter-character spacing) or \emph{beta-gumi} (typeset with no inter-character space between adjacent character frames). Or simply call \opt{aki} or \opt{beta} without \opt{kumi=}. Default: \opt{aki}. }
+    \ja{アキ組を使うかベタ組を使うかを設定する。\opt{kumi=} を書かず、単に \opt{aki} か \opt{beta} かと書いても大丈夫。}
 \end{optionlist}
 
-After initialising the options, you can still change the option values through \sty{exlp3} syntax, with a prefix \verb|\kanbun_| to option names. For example, to switch to \emph{beta-gumi}, you could use
+\SaveVerb{kanbunprefix}|\kanbun_|
+\en{After initialising the options, you can still change the option values through \sty{exlp3} syntax, with a prefix \UseVerb{kanbunprefix} to option names. For example, to switch to \emph{beta-gumi}, you could use}
+\ja{オプションを初期化する後でも、 \sty{exlp3} \ruby[pre=1]{構文}{シンタックス}でオプション名に \UseVerb{kanbunprefix} をプリフィックスして再アサインできる。例えば、ベタ組に再設定するには下記のコードを使う。}
 \begin{example}
 \ExplSyntaxOn
 \tl_set:Nn \kanbun_kumi { beta }
 \ExplSyntaxOff
 \end{example}
 
-\subsection[Basic usage without \LuaLaTeX]{Basic usage without \LuaLaTeX{} (not recommended)}
-When not using the advanced \emph{kanbun}-annotation functionality, it is possible to typeset \emph{kanbun} with any engine with \textsc{cjk} support, such as using \XeLaTeX{} with the \sty{xeCJK} package, or using \upLaTeX{} with \sty{utarticle} or other appropriate class. 
+\subsection[\en{Basic usage without \LuaLaTeX}\ja{\LuaLaTeX{}を使わない場合の基本使用}]{\en{Basic usage without \LuaLaTeX{} (not recommended)}\ja{\LuaLaTeX{}を使わない場合の基本使用（お薦めではない）}}
+\en{When not using the advanced \emph{kanbun}-annotation functionality, it is possible to typeset \emph{kanbun} with any engine with \textsc{cjk} support, such as using \XeLaTeX{} with the \sty{xeCJK} package, or using \upLaTeX{} with \sty{utarticle} or other appropriate class. }
+\ja{漢文アノテーションの機能を使わない場合、任意の CJK 支援のあるエンジンで漢文を組版できる。例えば\XeLaTeX{} を \sty{xeCJK} パッケージと一緒に使うか、 \upLaTeX{} を \sty{utarticle} クラス或いは他の適宜なクラスと一緒に使うか、どちらも可。}
 
 \begin{ltxsyntax}
-    \cmditem{kanjiunit}\verb|{ |\cmd{furiokuri}\mprm{right furigana}\mprm{right okurigana}\verb| }|\vspace{-5pt}\\
-    \mprm{left punctuation (e.g.~`「')}\\
-    \mprm{kanji}\\
-    \mprm{other punctuation}\\
-    \mprm{kaeriten}\\
-    \verb|{ |\cmd{furiokuri}\mprm{left furigana}\mprm{left okurigana}\verb| }|
+    \cmditem{kanjiunit}\verb|{ |\cmd{furiokuri}\mprm{\en{right furigana}\ja{右の振り仮名}}\mprm{\en{right okurigana}\ja{右の送り仮名}}\verb| }|\vspace{-5pt}\\
+    \mprm{\en{left (top) punctuation (e.g.~`「')}\ja{左（上）の句読点（“「”など）}}\\
+    \mprm{\en{kanji}\ja{漢字}}\\
+    \mprm{\en{other punctuation}\ja{他の句読点}}\\
+    \mprm{\en{kaeriten}\ja{返り点}}\\
+    \verb|{ |\cmd{furiokuri}\mprm{\en{left furigana}\ja{左の振り仮名}}\mprm{\en{left okurigana}\ja{左の送り仮名}}\verb| }|
 
     \cmditem{kanbunfont}
 
-    Sets the font size of \emph{kanji}. Use when the \opt{unit} option is set different to the document's default font size.
+    \en{Sets the font size of \emph{kanji}. Use when the \opt{unit} option is set different to the document's default font size.}
+    \ja{漢字のサイズを設定する。\opt{unit} オプションと文書のデフォルト文字サイズが違う時に使う。}
 
-    Use \cmd{multifuriokuri} instead of \cmd{furiokuri} if you are putting \emph{furigana} to multiple kanji.
+    \en{Use \cmd{multifuriokuri} instead of \cmd{furiokuri} if you are putting \emph{furigana} to multiple kanji.}
+    \ja{複数個の漢字に仮名を振れば、 \cmd{furiokuri} の代わりに \cmd{multifuriokuri} を使う。}
 
-    \cmditem{multifuriokuri}\oprm{length by which {furigana} is raised}\mprm{furigana}\mprm{okurigana}
+    \cmditem{multifuriokuri}\oprm{\en{length by which ruby is raised}\ja{ルビ文字を上げる長さ}}\mprm{\en{furigana}\ja{振り仮名}}\mprm{\en{okurigana}\ja{送り仮名}}
 \end{ltxsyntax}
 
-For example, the code
+\en{For example, the code}
+\ja{例えば、 \opt{tateaki} が \verb|1| に設定されている場合、下記のコードを使えば}
 \begin{example}
 % example text from https://phesoca.com/kanbun-html/
 \kanbunfont
@@ -217,7 +263,8 @@ For example, the code
 \kanjiunit{\furiokuri{}{ヲ}}{}{志}{。}{一}{}
 \par
 \end{example}
-outputs
+\en{outputs}
+\ja{こう出力する}
 
 \printkanbunblock{6}{
 \kanbunfont
@@ -232,36 +279,42 @@ outputs
 }
 
 \noindent
-with \opt{tateaki} set to \verb|1|.
+\en{with \opt{tateaki} set to \verb|1|.}
 
-\subsection{Usage with \LuaLaTeX}
-\emph{Kanbun} annotation uses the following brackets to mark different elements in \emph{kanbun-kundoku} (as described in \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca). 
+\subsection{\en{Usage with \LuaLaTeX}\ja{\LuaLaTeX{}での使用}}
+\en{\emph{Kanbun} annotation uses the following brackets to mark different elements in \emph{kanbun-kundoku} (as described in \href{https://phesoca.com/kanbun-html/}{漢文\textsc{html}} by UntPhesoca). }
+\ja{漢文アノテーションでは下記の括弧を以って漢文訓読においての各要素を示す（UntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} を参照されたい）。}
 \begin{itemize}
-    \item \verb|( )|: \emph{furigana} (振り仮名)
-    \item \verb|{ }|: \emph{okurigana} (送り仮名) (these brackets can be omitted)
-    \item \verb|‹ ›|: \emph{furigana} (振り仮名) of \emph{saidoku-moji} (再読文字)
-    \item \verb|« »|: \emph{okurigana} (送り仮名) of \emph{saidoku-moji} (再読文字)
-    \item \verb|[ ]|: \emph{kaeriten} (返り点)
-    \item \verb|‘ ’|: multiple \emph{kanji}, potentially with \emph{tateten} inserted, as a ruby base; group ruby (グループルビ)
-    \item no annotation: \emph{kanji} (漢字) and punctuation.
+    \item \verb|( )|: \en{\emph{furigana} (}振り仮名\en{)}
+    \item \verb|{ }|: \en{\emph{okurigana} (}送り仮名\en{) (these brackets can be omitted)}\ja{（この括弧を省略しても大丈夫）}
+    \item \verb|‹ ›|: \en{\emph{furigana} (振り仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の振り仮名}
+    \item \verb|« »|: \en{\emph{okurigana} (送り仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の送り仮名}
+    \item \verb|[ ]|: \en{\emph{kaeriten} (}返り点\en{)}
+    \item \verb|‘ ’|: \en{multiple \emph{kanji}, potentially with \emph{tateten} inserted, as a ruby base; group ruby (グループルビ)}\ja{グループルビのベース。中に\ruby{竪|点}{たて|てん}を入れても可}
+    \item \en{no annotation: \emph{kanji} (漢字) and punctuation}\ja{アノテーション無し：漢字と句読点}
 \end{itemize}
-\emph{Tateten} (竪点) can be input with either \verb|―| (\verb|U+2015|), \verb|—| (\verb|U+2014|) or \verb|㆐| (\verb|U+3190|).
+\en{\emph{Tateten} (竪点) can be input with either \verb|―| (\verb|U+2015|), \verb|—| (\verb|U+2014|) or \verb|㆐| (\verb|U+3190|).}
+\ja{\verb|―| (\verb|U+2015|) か \verb|—| (\verb|U+2014|) か \verb|㆐| (\verb|U+3190|) かで竪点を入力できる。}
 
 \begin{ltxsyntax}
     \cmditem{Kanbun}\cmditem{EndKanbun}
 
-    Write the annotated \emph{kanbun} between the commands \cmd{Kanbun} and \cmd{EndKanbun}, and it will be processed and saved, ready to be used later.
+    \en{Write the annotated \emph{kanbun} between the commands \cmd{Kanbun} and \cmd{EndKanbun}, and it will be processed and saved, ready to be used later.}
+    \ja{アノテーションのある漢文を \cmd{Kanbun} と \cmd{EndKanbun} の間に書き込む。処理されて、保存されておいて、後で使用可能となる。}
 
     \cmditem{printkanbun}
 
-    Where you would like to use the most recently saved \emph{kanbun-kundoku} paragraph, use \cmd{printkanbun}. 
+    \en{Where you would like to use the most recently saved \emph{kanbun-kundoku} paragraph, use \cmd{printkanbun}.}
+    \ja{最近保存された漢文訓読を使用するには、 \cmd{printkanbun} を使う。}
 
     \cmditem{printkanbuncode}
 
-    If you wish to make modifications on the result or to use the result with a non-\LuaTeX{} engine, it is possible to obtain the macros using \cmd{printkanbuncode} (prints in the terminal), and continue to work from there.
+    \en{If you wish to make modifications on the result or to use the result with a non-\LuaTeX{} engine, it is possible to obtain the macros using \cmd{printkanbuncode} (prints in the terminal), and continue to work from there.}
+    \ja{処理の結果を一部変更する、もしくは結果を\LuaTeX{}でないエンジンで使用するには、結果のマクロを \cmd{printkanbuncode} で入手して（端末に出力）、そこから作業を続けることが可能。}
 \end{ltxsyntax}
 
-You can always save \cmd{printkanbun} to a macro and start a new annotated \emph{kanbun} block, as in the following example.
+\en{You can always save \cmd{printkanbun} to a macro and start a new annotated \emph{kanbun} block, as in the following example.}
+\ja{次の実例のとおり、いつでも \cmd{printkanbun} をあるマクロに保存し、新しい漢文段落を書き込み始められる。}
 \begin{example}
 % example text from https://phesoca.com/kanbun-html/
 \documentclass{ltjtarticle}
