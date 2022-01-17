@@ -51,8 +51,8 @@
         , yokoaki .initial:n = { \kanbun_scale }
         , tateaki .tl_set:N = \kanbun_tateaki
         , tateaki .initial:n = { 2 }
-        , okuriprotrusion .tl_set:N = \kanbun_okuriprotrusion
-        , okuriprotrusion .initial:n = { 1 }
+        , okuriintrusion .tl_set:N = \kanbun_okuriintrusion
+        , okuriintrusion .initial:n = { 1 }
         , kumi .tl_set:N = \kanbun_kumi
         , kumi .initial:n = { aki }
         , aki .code:n = \keys_set:nn { kanbun } { kumi = aki }
@@ -185,8 +185,8 @@
 \NewDocumentCommand { \furiokuri } { m m }
     {
         \settowidth{\kanbun_furilen}{#1}
-        \ifdim\kanbun_furilen < \fp_eval:n {1-\kanbun_okuriprotrusion/\kanbun_scale}\kanbun_zw
-            \makebox[\fp_eval:n {1-\kanbun_okuriprotrusion/\kanbun_scale}\kanbun_zw][l]{#1}
+        \ifdim\kanbun_furilen < \fp_eval:n {1-\kanbun_okuriintrusion/\kanbun_scale}\kanbun_zw
+            \makebox[\fp_eval:n {1-\kanbun_okuriintrusion/\kanbun_scale}\kanbun_zw][l]{#1}
         \else
             #1
         \fi
@@ -235,7 +235,7 @@
     {
         \kanbun_rubyfontcmd
         \kern \fp_eval:n { -(#1) }\kanbun_zw
-        \makebox[\fp_eval:n { (#1) + 1 - \kanbun_okuriprotrusion/\kanbun_scale }\kanbun_zw][s]{#2}
+        \makebox[\fp_eval:n { (#1) + 1 - \kanbun_okuriintrusion/\kanbun_scale }\kanbun_zw][s]{#2}
         #3
     }
 
