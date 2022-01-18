@@ -118,7 +118,7 @@
         \footnote{日本人ではないので、日本語ネイティヴの方がいらっしゃればマニュアルを書き直して下さると嬉しい。}
     }
 }
-\date{\en{\scshape 15 january 2022, v1.0}\ja{2022年1月15日, v1.0}}
+\date{\en{\scshape 17 january 2022, v1.1}\ja{2022年1月15日, v1.0}}
 
 
 \begin{document}
@@ -198,17 +198,17 @@
     \SaveVerb{fontcmd}|\addjfontfeatures{RawFeature={+trad}}|
     \optitem[]{fontcmd}{\prm{\en{font command}\ja{書体のコマンド}}}
     \en{Sets the font command to use for \emph{kanji}. If \sty{luatexja-fontspec} is loaded, it is set default to \UseVerb{fontcmd} to obtain traditional \emph{kanji} if applicable.}
-    \ja{漢字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれている場合、 \UseVerb{fontcmd} に初期化されて、旧字体のグリフに変更する。}
+    \ja{漢字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれてある場合、 \UseVerb{fontcmd} に初期化されて、旧字体のグリフに変更する。}
 
     \SaveVerb{rubyfontcmd}|\addjfontfeatures{RawFeature={+ruby}}|
     \optitem[]{rubyfontcmd}{\prm{\en{font command}\ja{書体のコマンド}}}
     \en{Sets the font command to use for ruby texts. If \sty{luatexja-fontspec} is loaded, it is set default to \UseVerb{rubyfontcmd} to obtain ruby glyphs when applicable.}
-    \ja{ルビ文字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれている場合、 \UseVerb{rubyfontcmd} に初期化されて、ルビグリフに変更する。}
+    \ja{ルビ文字の書体のコマンドを設定する。\sty{luatexja-fontspec}パッケージが読み込まれてある場合、 \UseVerb{rubyfontcmd} に初期化されて、ルビグリフに変更する。}
 
-    \SaveVerb{unit}|\kanbun_zw|
+    \SaveVerb{unit}|\kanbun_init_zw|
     \optitem[]{unit}{\prm{\en{length}\ja{長さ}}}
-    \en{Sets the base size (size of \emph{kanji}). Default: \UseVerb{unit}, which is initialised as \verb|1em|.}
-    \ja{漢字の基本サイズを設定する。初期値： \UseVerb{unit}、つまり \verb|1em|。}
+    \en{Sets the dimensions of \emph{kanji} (assuming it is a square). Default: \UseVerb{unit}, which is a length equal to \verb|1em|.}
+    \ja{（正方形だと仮定して）漢字の寸法を設定する。初期値： \UseVerb{unit} （\verb|1em| に等しい長さ）。}
 
     \optitem[]{yokoaki}{\prm{\en{ratio}\ja{比}}}
     \en{Sets the horizontal space between \emph{kanji} with respect to the size of ruby texts. Default: \verb|2|.}
@@ -224,7 +224,7 @@
 
     \optitem[]{kumi}{\opt{aki}, \opt{beta}}
     \en{Sets whether to use \emph{aki-gumi} (typeset with uniform inter-character spacing) or \emph{beta-gumi} (typeset with no inter-character space between adjacent character frames). Or simply call \opt{aki} or \opt{beta} without \opt{kumi=}. Default: \opt{aki}. }
-    \ja{アキ組を使うかベタ組を使うかを設定する。\opt{kumi=} を書かず、単に \opt{aki} か \opt{beta} かと書いても大丈夫。}
+    \ja{アキ組を使うかベタ組を使うかを設定する。\opt{kumi=} を書かず、単に \opt{aki} か \opt{beta} かと書いてもよい。}
 \end{optionlist}
 
 \SaveVerb{kanbunprefix}|\kanbun_|
@@ -238,7 +238,7 @@
 
 \subsection[\en{Basic usage without \LuaLaTeX}\ja{\LuaLaTeX{}を使わない場合の基本使用}]{\en{Basic usage without \LuaLaTeX{} (not recommended)}\ja{\LuaLaTeX{}を使わない場合の基本使用（お薦めではない）}}
 \en{When not using the advanced \emph{kanbun}-annotation functionality, it is possible to typeset \emph{kanbun} with any engine with \textsc{cjk} support, such as using \XeLaTeX{} with the \sty{xeCJK} package, or using \upLaTeX{} with \sty{utarticle} or other appropriate class. }
-\ja{漢文アノテーションの機能を使わない場合、任意の CJK 支援のあるエンジンで漢文を組版できる。例えば\XeLaTeX{} を \sty{xeCJK} パッケージと一緒に使うか、 \upLaTeX{} を \sty{utarticle} クラス或いは他の適宜なクラスと一緒に使うか、どちらも可。}
+\ja{漢文アノテーションの機能を使わない場合、任意の CJK 支援のあるエンジンで漢文を組版できる。例えば\XeLaTeX{} を \sty{xeCJK} パッケージと一緒に使うか、 \upLaTeX{} を \sty{utarticle} クラス或いは他の適宜なクラスと一緒に使うか、どちらもよい。}
 
 \begin{ltxsyntax}
     \cmditem{kanjiunit}\verb|{ |\cmd{furiokuri}\mprm{\en{right furigana}\ja{右の振仮名}}\mprm{\en{right okurigana}\ja{右の送仮名}}\verb| }|\vspace{-5pt}\\
@@ -296,11 +296,11 @@
 \ja{漢文アノテーションでは下記の括弧を以って漢文訓読においての各要素を示す（UntPhesocaの \href{https://phesoca.com/kanbun-html/}{漢文HTML} を参照されたい）。}
 \begin{itemize}
     \item \verb|( )|: \en{\emph{furigana} (}振仮名\en{)}
-    \item \verb|{ }|: \en{\emph{okurigana} (}送仮名\en{) (these brackets can be omitted)}\ja{（この括弧を省略しても大丈夫）}
+    \item \verb|{ }|: \en{\emph{okurigana} (}送仮名\en{) (these brackets can be omitted)}\ja{（この括弧を省略してもよい）}
     \item \verb|‹ ›|: \en{\emph{furigana} (振仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の振仮名}
     \item \verb|« »|: \en{\emph{okurigana} (送仮名) of \emph{saidoku-moji} (再読文字)}\ja{再読文字の送仮名}
     \item \verb|[ ]|: \en{\emph{kaeriten} (}返り点\en{)}
-    \item \verb|‘ ’|: \en{multiple \emph{kanji}, potentially with \emph{tateten} inserted, as a ruby base; group ruby (グループルビ)}\ja{グループルビのベース。中に\ruby{竪|点}{たて|てん}を入れても可}
+    \item \verb|‘ ’|: \en{multiple \emph{kanji}, potentially with \emph{tateten} inserted, as a ruby base; group ruby (グループルビ)}\ja{グループルビのベース。中に\ruby{竪|点}{たて|てん}を入れてもよい}
     \item \en{no annotation: \emph{kanji} (漢字) and punctuation}\ja{アノテーション無し：漢字と句読点}
 \end{itemize}
 \en{\emph{Tateten} (竪点) can be input with either \verb|―| (\verb|U+2015|), \verb|—| (\verb|U+2014|) or \verb|㆐| (\verb|U+3190|).}
