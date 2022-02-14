@@ -18,16 +18,14 @@
 \NeedsTeXFormat{LaTeX2e}[2021/06/01]
 \RequirePackage{expl3,xparse,l3keys2e,ifluatex}
 \ProvidesExplClass{kanbun}
-    {2022/01/17} {1.1} {漢文の訓点文の組版}
+    {2022/02/13} {1.2} {漢文の訓点文の組版}
 
 \ExplSyntaxOn
 \cs_generate_variant:Nn \str_if_eq:nnTF { V }
 \cs_generate_variant:Nn \str_case:nnTF { V }
+\cs_generate_variant:Nn \str_case:nnTF { f }
 
 % vars used in options
-\tl_set:Nn \kanbun_scale { 2 }
-\newlength\kanbun_init_zw
-\setlength\kanbun_init_zw{1em}
 \@ifpackageloaded{luatexja-fontspec}{
     \tl_set:Nn \kanbun_rubyfontcmd_default { \addjfontfeatures{RawFeature={+ruby}} }
     \tl_set:Nn \kanbun_fontcmd_default { \addjfontfeatures{RawFeature={+trad}} }
@@ -39,32 +37,38 @@
 % options
 \keys_define:nn { kanbun }
     {    
-        , scale .tl_set:N = \kanbun_scale
+        , scale .fp_set:N = \kanbun_scale
         , scale .initial:n = { 2 }
         , fontcmd .tl_set:N = \kanbun_fontcmd
         , fontcmd .initial:n = \kanbun_fontcmd_default
         , rubyfontcmd .tl_set:N = \kanbun_rubyfontcmd
         , rubyfontcmd .initial:n = \kanbun_rubyfontcmd_default
-        , unit .tl_set:N = \kanbun_zw
-        , unit .initial:n = { \kanbun_init_zw }
-        , yokoaki .tl_set:N = \kanbun_yokoaki
-        , yokoaki .initial:n = { \kanbun_scale }
-        , tateaki .tl_set:N = \kanbun_tateaki
+        , unit .dim_set:N = \kanbun_zw
+        , unit .initial:n = { 1em }
+        , yokoaki .fp_set:N = \kanbun_yokoaki
+        , yokoaki .initial:n = { 2 }
+        , tateaki .fp_set:N = \kanbun_tateaki
         , tateaki .initial:n = { 2 }
-        , okuriintrusion .tl_set:N = \kanbun_okuriintrusion
+        , okuriintrusion .fp_set:N = \kanbun_okuriintrusion
         , okuriintrusion .initial:n = { 1 }
-        , kumi .tl_set:N = \kanbun_kumi
+        , kumi .str_set:N = \kanbun_kumi
         , kumi .initial:n = { aki }
         , aki .code:n = \keys_set:nn { kanbun } { kumi = aki }
         , beta .code:n = \keys_set:nn { kanbun } { kumi = beta }
     }
 \ProcessKeysOptions { kanbun }
+\DeclareDocumentCommand \setkanbun { m } { 
+    \keys_set:nn { kanbun } { #1 } 
+}
 
 % other vars
 \tl_set:Nn \kanbun_rubyfontsize_rubyfontcmd { \kanbun_rubyfontcmd\fontsize{\fp_eval:n {1/\kanbun_scale}\kanbun_zw}{0pt}\selectfont }
 \newlength{\kanbun_furilen}
+\newlength{\kanbun_okurilen}
+\newlength{\kanbun_furiokuri_firstline_len}
+\int_new:N \kanbun_furiokuri_firstline_start_index
 \tl_set:Nn \kanbun_tateten_width { 1/30 }
-\tl_set:Nn \kanbunzwtosp { \fp_eval:n {\dim_ratio:nn { 1 \kanbun_zw } { 1 sp } } }
+\tl_set:Nn \kanbunzwtosp { \fp_eval:n { \dim_ratio:nn { 1 \kanbun_zw } { 1 sp } } }
 \tl_set:Nn \kanbun_unit_glue { 
     \str_if_eq:VnTF \kanbun_kumi { aki } {
         \penalty0
@@ -90,18 +94,18 @@
         \tl_set:Nn \central_punct {}
         \process_punct{ #4 }
         \tl_set:Nn \kanbun_central_punct_box {
-            \kanbun_ensure_height{1\kanbun_zw} {
+            \kanbun_ensure_height{\kanbun_zw} {
                 \str_if_eq:VnTF \kanbun_kumi { aki } 
                 {
-                    \hbox{\kern 1\kanbun_zw{\hbox to \fp_eval:n { \kanbun_tateaki/\kanbun_scale }\kanbun_zw{\hss{\central_punct}\hss}}}
+                    \hbox{\kern \kanbun_zw{\hbox to \fp_eval:n { \kanbun_tateaki/\kanbun_scale }\kanbun_zw{\hss{\central_punct}\hss}}}
                 }
                 {
-                    \hbox{\kern 1\kanbun_zw{\central_punct}}
+                    \hbox{\kern \kanbun_zw{\central_punct}}
                 }
             }
         }
         \tl_set:Nn \kanbun_left_punct_phantom {
-            \kanbun_ensure_height{1\kanbun_zw} {
+            \kanbun_ensure_height{\kanbun_zw} {
                 \str_if_eq:VnTF \kanbun_kumi { aki } { }
                 {
                     \str_if_eq:nnTF { #2 } { } { } {
@@ -111,9 +115,16 @@
             }
         }
         \tl_set:Nn \kanbun_right_punct_box {
-            \kanbun_ensure_height{1\kanbun_zw} {
+            \kanbun_ensure_height{\kanbun_zw} {
+                \vfill % make sure punct stay on baseline in yoko direction (xeCJK)
                 \str_if_eq:VnTF \right_punct { } { } {
-                    \hbox{\kern 1\kanbun_zw{\right_punct}}
+                    \hbox{
+                        \kern \kanbun_zw
+                        \bool_if:NTF \kanbun_first_right_punct_is_kagi {
+                            \phantom{ \kanbun_rubyfontsize_rubyfontcmd\kaeriten{#5} }
+                        } { }
+                        \right_punct
+                    }
                 }
             }
         }
@@ -121,32 +132,36 @@
         \tl_set:Nn \unit_content {
             \kanbun_left_punct_phantom % compensate for width of left punct
             \vbox{
-                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kanbun_rubyfontsize_rubyfontcmd{#1}}} % right kana
+                \bool_set_true:N \kanbun_is_right_kana
+                \kanbun_ensure_height{ 0pt }{\hbox{\kanbun_rubyfontsize_rubyfontcmd{#1}}} % right kana
                 \nointerlineskip %
-                \kanbun_ensure_height{1\kanbun_zw}{\llap{#2}} % left punct
+                \vspace*{\fp_eval:n { 0.5/\kanbun_scale }\kanbun_zw}
+                \kanbun_ensure_height{\kanbun_zw}{\llap{#2}} % left punct
                 \nointerlineskip %
                 \vspace*{-1 \kanbun_zw}
-                \kanbun_ensure_height{1\kanbun_zw}{
-                        \hbox to 1\kanbun_zw{\hss{#3}\hss}
+                \kanbun_ensure_height{\kanbun_zw}{
+                        \hbox to \kanbun_zw{\hss{#3}\hss}
                 } % kanji
                 \nointerlineskip %
                 \vspace*{-1 \kanbun_zw}
-                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kern 1\kanbun_zw{\ninojiten_punct}}} % ninojiten
+                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kern \kanbun_zw{\ninojiten_punct}}} % ninojiten
                 \nointerlineskip %
                 \vspace*{\fp_eval:n { -1/\kanbun_scale }\kanbun_zw}
                 \kanbun_right_punct_box % right punct
                 \nointerlineskip %
-                \vspace*{-1\kanbun_zw}
+                \vspace*{-\kanbun_zw}
                 \kanbun_central_punct_box % central punct
                 \nointerlineskip %
                 \vspace*{ \fp_eval:n { -1/\kanbun_scale }\kanbun_zw }
-                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kanbun_rubyfontsize_rubyfontcmd\kern 1\kanbun_zw{\kaeriten{#5}}}} % kaeriten
+                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kanbun_rubyfontsize_rubyfontcmd\kern \kanbun_zw{\kaeriten{#5}}}} % kaeriten
                 \nointerlineskip %
-                \kanbun_ensure_height{\fp_eval:n { 1/\kanbun_scale }\kanbun_zw}{\hbox{\kanbun_rubyfontsize_rubyfontcmd{#6}}} % left kana
+                \vspace*{\fp_eval:n { 0.5/\kanbun_scale }\kanbun_zw}
+                \bool_set_false:N \kanbun_is_right_kana
+                \kanbun_ensure_height{ 0pt }{\hbox{\kanbun_rubyfontsize_rubyfontcmd{#6}}} % left kana
             }
         }
         \str_if_eq:VnTF \kanbun_kumi { aki } {
-            \setbox\kanbun_current_kanjiunit \hbox to \fp_eval:n { 1+\kanbun_tateaki/\kanbun_scale }\kanbun_zw{ \unit_content }
+            \setbox\kanbun_current_kanjiunit \hbox to \kanbun_zw{ \unit_content \hss}
         }{
             \setbox\kanbun_current_kanjiunit \hbox{ \unit_content }
         }
@@ -162,10 +177,12 @@
         \str_if_eq:VnTF \kanbun_kumi { aki } 
             {
                 \usebox\kanbun_current_kanjiunit
+                \hskip\fp_eval:n { \kanbun_tateaki/\kanbun_scale }\kanbun_zw
             }
             {
                 \discretionary{
-                    \usebox\kanbun_current_kanjiunit\kern\dimexpr1\kanbun_zw-\wd\kanbun_current_kanjiunit\relax
+                    \usebox\kanbun_current_kanjiunit
+                    \kern\dim_eval:n { \kanbun_zw - \box_wd:N \kanbun_current_kanjiunit }
                 }{
                     % 
                 }{
@@ -182,15 +199,63 @@
         \nobreak
         \kanbun_unit_glue
     }
+\cs_new:Nn \kanbun_dim_to_fp_and_round:n {
+    \fp_eval:n { round( \dim_to_fp:n { #1 }, 0 ) }
+}
+\cs_new:Nn \kanbun_typeset_normal_kana:nn {
+    \dim_compare:nNnTF { \kanbun_furilen } < { \fp_eval:n { 1-\kanbun_okuriintrusion/\kanbun_scale }\kanbun_zw }
+        { \makebox[\fp_eval:n { 1-\kanbun_okuriintrusion/\kanbun_scale }\kanbun_zw][l]{ #1 } }
+        { #1 }
+    #2
+}
+\cs_new:Nn \kanbun_typeset_long_kana_by_raising_okurigana:nn {
+        \makebox[ \dim_eval:n { \fp_eval:n { 1 + \kanbun_tateaki / \kanbun_scale }\kanbun_zw - \kanbun_okurilen } ][l]{ #1 }
+        #2
+}
+\cs_new:Nn \kanbun_typeset_long_kana:n {
+    \str_set:Nn \kanbun_furiokuri_all { #1 }
+    \int_set:Nn \kanbun_furiokuri_firstline_start_index { -1 }
+    \settowidth{ \kanbun_furiokuri_firstline_len }{ }
+    % 
+    \fp_while_do:nn { 
+        \kanbun_dim_to_fp_and_round:n { \kanbun_furiokuri_firstline_len } < \kanbun_dim_to_fp_and_round:n { \fp_eval:n { (\kanbun_okuriintrusion + \kanbun_tateaki) / \kanbun_scale }\kanbun_zw }
+        % \kanbun_dim_to_fp_and_round:n { \kanbun_furiokuri_firstline_len } < \kanbun_dim_to_fp_and_round:n { ( \kanbun_furilen + \kanbun_okurilen ) / 2 } 
+    } {
+        \int_decr:N \kanbun_furiokuri_firstline_start_index
+        \settowidth{ \kanbun_furiokuri_firstline_len }{ \str_range:Nnn \kanbun_furiokuri_all { \kanbun_furiokuri_firstline_start_index } { -1 } }
+    }
+    % output
+    \rlap{\raisebox{ \bool_if:NTF \kanbun_is_right_kana { } { - } \fp_eval:n { 1 / \kanbun_scale }\kanbun_zw }[0pt][0pt]{
+        \kern \fp_eval:n { .5/\kanbun_scale }\kanbun_zw
+        \kern \fp_to_dim:n { min( 0, \kanbun_dim_to_fp_and_round:n { \fp_eval:n { 2 * (\kanbun_okuriintrusion + \kanbun_tateaki) / \kanbun_scale }\kanbun_zw - \kanbun_furilen - \kanbun_okurilen } ) }
+        \str_range:Nnn \kanbun_furiokuri_all { 1 } { \kanbun_furiokuri_firstline_start_index - 1 }
+    }}
+    \kern \fp_eval:n { 1-\kanbun_okuriintrusion/\kanbun_scale }\kanbun_zw \str_range:Nnn \kanbun_furiokuri_all { \kanbun_furiokuri_firstline_start_index } { -1 } 
+}
 \NewDocumentCommand { \furiokuri } { m m }
     {
-        \settowidth{\kanbun_furilen}{#1}
-        \ifdim\kanbun_furilen < \fp_eval:n {1-\kanbun_okuriintrusion/\kanbun_scale}\kanbun_zw
-            \makebox[\fp_eval:n {1-\kanbun_okuriintrusion/\kanbun_scale}\kanbun_zw][l]{#1}
-        \else
-            #1
-        \fi
-        #2
+        \settowidth{ \kanbun_furilen }{ #1 }
+        \settowidth{ \kanbun_okurilen }{ #2 }
+
+        \str_if_eq:VnTF \kanbun_kumi { aki } 
+            { 
+                \fp_compare:nTF { \kanbun_dim_to_fp_and_round:n { \kanbun_furilen + \kanbun_okurilen } > \kanbun_dim_to_fp_and_round:n {\fp_eval:n { 1 + \kanbun_tateaki / \kanbun_scale }\kanbun_zw} } {
+                    \kanbun_typeset_long_kana:n { #1 #2 }
+                } {
+                    \fp_compare:nTF { \kanbun_dim_to_fp_and_round:n { \kanbun_okurilen } >= \kanbun_dim_to_fp_and_round:n { \fp_eval:n { (\kanbun_okuriintrusion + \kanbun_tateaki) / \kanbun_scale }\kanbun_zw } } {
+                        \fp_compare:nTF { \kanbun_dim_to_fp_and_round:n { \kanbun_okurilen } <= \kanbun_dim_to_fp_and_round:n { \fp_eval:n { 1 + (\kanbun_tateaki - 1) / \kanbun_scale }\kanbun_zw } } {
+                            \kanbun_typeset_long_kana_by_raising_okurigana:nn { #1 } { #2 }
+                        } {
+                            \kanbun_typeset_long_kana:n { #1 #2 }
+                        }
+                    } {
+                        \kanbun_typeset_normal_kana:nn { #1 } { #2 }
+                    }
+                }
+            }
+            {
+                \kanbun_typeset_normal_kana:nn { #1 } { #2 }
+            }
     }
 \NewDocumentCommand { \kaeriten } { m }
     {
@@ -212,13 +277,13 @@
         { — } { \tl_put_right:Nn \central_punct { \tateten } }
         { ― } { \tl_put_right:Nn \central_punct { \tateten } }
         { ㆐ } { \tl_put_right:Nn \central_punct { \tateten } }
-        % { ： } { \tl_put_right:Nn \central_punct { \hbox to 1\kanbun_zw{\hss{：}\hss} } }
-        % { ・ } { \tl_put_right:Nn \central_punct { \hbox to 1\kanbun_zw{\hss{・}\hss} } }
+        % { ： } { \tl_put_right:Nn \central_punct { \hbox to \kanbun_zw{\hss{：}\hss} } }
+        % { ・ } { \tl_put_right:Nn \central_punct { \hbox to \kanbun_zw{\hss{・}\hss} } }
         { ： } { \tl_put_right:Nn \right_punct { \hbox to 0.5\kanbun_zw{\hss{：}\hss} } }
         { ・ } { \tl_put_right:Nn \right_punct { \hbox to 0.5\kanbun_zw{\hss{・}\hss} } }
-        { … } { \tl_put_right:Nn \central_punct { \hbox to 1\kanbun_zw{\hss{…}\hss} } }
-        { ！ } { \tl_put_right:Nn \central_punct { \hbox to 1\kanbun_zw{\hss{！}\hss} } }
-        { ？ } { \tl_put_right:Nn \central_punct { \hbox to 1\kanbun_zw{\hss{？}\hss} } }
+        { … } { \tl_put_right:Nn \central_punct { \hbox to \kanbun_zw{\hss{…}\hss} } }
+        { ！ } { \tl_put_right:Nn \central_punct { \hbox to \kanbun_zw{\hss{！}\hss} } }
+        { ？ } { \tl_put_right:Nn \central_punct { \hbox to \kanbun_zw{\hss{？}\hss} } }
         { 〻 } { 
             \tl_put_right:Nn \ninojiten_punct { \ninojiten } 
             \tl_put_right:Nn \right_punct { \phantom{\ninojiten} }
@@ -227,8 +292,14 @@
         \tl_put_right:Nn \right_punct { \hbox to 0.5\kanbun_zw{\hfil#1\hss} } 
     }
 }
+% \bool_new:N 
 \NewDocumentCommand { \process_punct } { m }
     {
+        \bool_set_false:N \kanbun_first_right_punct_is_kagi
+        \str_case:fnTF { \str_range:nnn { #1 } { 1 } { 1 } } {
+            { 」 } { \bool_set_true:N \kanbun_first_right_punct_is_kagi }
+            { 』 } { \bool_set_true:N \kanbun_first_right_punct_is_kagi }
+        } { } { }
         \str_map_function:nN { #1 } \process_punct_map
     }
 \NewDocumentCommand { \multifuriokuri } { O{2\kanbun_zw} m m }
@@ -256,7 +327,8 @@
     { \kanbun_rubyfontsize_rubyfontcmd 〻 }
 
 % corrects fontsize of ruby base
-\NewDocumentCommand { \kanbunfont } {} { \parindent=0pt\kanbun_fontcmd\fontsize{\kanbun_zw}{\fp_eval:n {1+\kanbun_yokoaki/\kanbun_scale}\kanbun_zw}\selectfont}
+% \NewDocumentCommand { \kanbunfont } {} { \parindent=0pt\kanbun_fontcmd\fontsize{\kanbun_zw}{\fp_eval:n {1+\kanbun_yokoaki/\kanbun_scale}\kanbun_zw}\selectfont}
+\NewDocumentCommand { \kanbunfont } {} { \kanbun_fontcmd\fontsize{\kanbun_zw}{\fp_eval:n {1+\kanbun_yokoaki/\kanbun_scale}\kanbun_zw}\selectfont}
 \NewDocumentEnvironment { kanjipar } { +b }
     {
         {

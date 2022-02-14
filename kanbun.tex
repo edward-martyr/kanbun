@@ -42,6 +42,7 @@
             ExplSyntaxOn,
             ExplSyntaxOff,
             kanjiunit,
+            setkanbun,
         }
     }}
     {}
@@ -119,8 +120,8 @@
     }
 }
 \date{
-    \en{\scshape 17 january 2022, v1.1}
-    \ja{2022年1月17日, v1.1}
+    \en{\scshape 13 february 2022, v1.2}
+    \ja{2022年2月13日, v1.2}
 }
 
 
@@ -231,12 +232,10 @@
 \end{optionlist}
 
 \SaveVerb{kanbunprefix}|\kanbun_|
-\en{After initialising the options, you can still change the option values through \sty{exlp3} syntax, with a prefix \UseVerb{kanbunprefix} to option names. For example, to switch to \emph{beta-gumi}, you could use}
-\ja{オプションを初期化する後でも、 \sty{exlp3} \ruby[pre=1]{構文}{シンタックス}でオプション名に \UseVerb{kanbunprefix} をプリフィックスして再アサインできる。例えば、ベタ組に再設定するには下記のコードを使う。}
+\en{After initialising the options, you can still change the option values through the command \cmd{setkanbun}. For example, to switch to \emph{beta-gumi}, you could use}
+\ja{オプションを初期化する後でも、 \cmd{setkanbun} を使ってオプションを変更できる。例えば、ベタ組に再設定するには下記のコードを使う。}
 \begin{example}
-\ExplSyntaxOn
-\tl_set:Nn \kanbun_kumi { beta }
-\ExplSyntaxOff
+\setkanbun{beta}
 \end{example}
 
 \subsection[\en{Basic usage without \LuaLaTeX}\ja{\LuaLaTeX{}を使わない場合の基本使用}]{\en{Basic usage without \LuaLaTeX{} (not recommended)}\ja{\LuaLaTeX{}を使わない場合の基本使用（お薦めではない）}}
@@ -317,13 +316,23 @@
 
     \cmditem{printkanbun}
 
-    \en{Where you would like to use the most recently saved \emph{kanbun-kundoku} paragraph, use \cmd{printkanbun}.}
-    \ja{最近保存された漢文訓読を使用するには、 \cmd{printkanbun} を使う。}
+    \en{Where you would like to use the most recently saved \emph{kanbun-kundoku} paragraph, use \cmd{printkanbun}. It automatically calls \cmd{kanbunfont} and \cmd{par} to set the font size and line spacing and make paragraphs.}
+    \ja{最近保存された漢文訓読を使用するには、 \cmd{printkanbun} を使う。自動的に \cmd{kanbunfont} と \cmd{par} を挿入して寸法やインテルを設定し、段落を作成する。}
 
     \cmditem{printkanbuncode}
 
     \en{If you wish to make modifications on the result or to use the result with a non-\LuaTeX{} engine, it is possible to obtain the macros using \cmd{printkanbuncode} (prints in the terminal), and continue to work from there.}
     \ja{処理の結果を一部変更する、もしくは結果を\LuaTeX{}でないエンジンで使用するには、結果のマクロを \cmd{printkanbuncode} で入手して（端末に出力）、そこから作業を続けることが可能。}
+
+    \cmditem{printkanbunnopar}
+
+    \en{The no-paragraph counterpart of \cmd{printkanbun}, which does not invoke \cmd{kanbunfont}, and uses \verb|\\| instead of \cmd{par}.}
+    \ja{\cmd{printkanbun} に対応する段落無しのバージョン。\cmd{kanbunfont}を使用せず、 \cmd{par} の代わりに \verb|\\| を使用する。}
+
+    \cmditem{printkanbunnoparcode}
+
+    \en{The no-paragraph counterpart of \cmd{printkanbuncode}.}
+    \ja{\cmd{printkanbuncode} に対応する段落無しのバージョン。}
 \end{ltxsyntax}
 
 \en{You can always save \cmd{printkanbun} to a macro for use later and start a new annotated \emph{kanbun} block, as in the following example.}
