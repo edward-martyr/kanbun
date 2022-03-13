@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# write date and version number
+bash replace.sh
+
+# compile documents
+lualatex kanbun-example.tex
+lualatex kanbun-en.tex
+lualatex kanbun-ja.tex
+
+# build zip
 mkdir kanbun
 
 cp kanbun.sty kanbun/kanbun.sty
