@@ -1,0 +1,13 @@
+name: Build LaTeX document for testing kanbun
+on: [push]
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: test.tex
+          latexmk_use_lualatex: true
