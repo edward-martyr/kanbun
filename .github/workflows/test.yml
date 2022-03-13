@@ -11,3 +11,4 @@ jobs:
         with:
           root_file: test.tex
           latexmk_use_lualatex: true
+
