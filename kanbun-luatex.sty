@@ -15,6 +15,7 @@
 % This work consists of the files kanbun.sty, kanbun.lua,
 % kanbun-luatex.sty, kanbun-example.tex and kanbun.tex.
 %
+\def\kanbun@runcoroutine#1{\newif\ifcontinue\continuetrue\directlua{ co = coroutine.create(#1) }\loop\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\ifcontinue\repeat}
 % *process kanbun annotation
 % verbatim reader adapted from https://tex.stackexchange.com/a/361759
 \directlua{
@@ -23,7 +24,7 @@ function store_lines (str)
     if string.find (str , "\noexpand\\EndKanbun" ) then
         luatexbase.remove_from_callback (
             "process_input_buffer" , "store_lines")
-        return "\\newif\\ifcontinue\\continuetrue\\directlua{ co = coroutine.create(main_loop) }\\loop\\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\\ifcontinue\\repeat"
+        return "\\autosetichirekern\\makeatletter\\kanbun@runcoroutine{main_loop}\\makeatother"
     else
         table.insert(verb_table, str)
     end
@@ -105,6 +106,6 @@ require("kanbun.lua")
         \end{mplibcode}
         }
     }
-    % define ichirekern
-    \newif\ifcontinue\continuetrue\directlua{ co = coroutine.create(determine_ichire_kern) }\loop\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\ifcontinue\repeat
+    % 
+    \DeclareDocumentCommand{\autosetichirekern}{}{\makeatletter\kanbun@runcoroutine{determine_ichire_kern}\makeatother}
 }
