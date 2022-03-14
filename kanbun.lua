@@ -13,7 +13,7 @@
 -- The Current Maintainer of this work is Yuanhao Chen.
 --
 -- This work consists of the files kanbun.sty, kanbun.lua,
--- kanbun-example.tex and kanbun.tex.
+-- kanbun-luatex.sty, kanbun-example.tex and kanbun.tex.
 
 function directtex(str)
     coroutine.yield(str)
@@ -249,7 +249,9 @@ function determine_ichire_kern()
     local prev_kern = 0
     local curr_kern = -10
     
-    directtex("\\setkanbun{ichirekern="..tostring(approximate(curr_kern, prev_kern, ichire_untouched)/100).."}")
+    local ichirekern = tostring(approximate(curr_kern, prev_kern, ichire_untouched)/100)
+
+    directtex("\\setkanbun{ichirekern="..ichirekern.."}\\kanbun@msg{Automatically setting ichirekern to "..ichirekern..".}")
 
     -- end loop in TeX
     directtex("\\continuefalse")
