@@ -58,12 +58,12 @@ require("kanbun.lua")
 % 
 % *process 一レ kerning
 \ExplSyntaxOn
-\DeclareDocumentCommand{\kanbun@ichiretruecode}{ m }{
-    \bool_if:NTF \kanbun_ichire { #1 } { }
+\DeclareDocumentCommand{\kanbun@ichiretruefalsecode}{ m m }{
+    \bool_if:NTF \kanbun_ichire { #1 } { #2 }
 }
 \ExplSyntaxOff
 % with reference to https://tex.stackexchange.com/a/451951
-\kanbun@ichiretruecode {
+\kanbun@ichiretruefalsecode {
     % 
     \directlua{require("outlinejfontpaths.lua")}
     % 
@@ -108,4 +108,6 @@ require("kanbun.lua")
     }
     % 
     \DeclareDocumentCommand{\autosetichirekern}{}{\makeatletter\kanbun@runcoroutine{determine_ichire_kern}\makeatother}
+}   {
+    \DeclareDocumentCommand{\autosetichirekern}{}{}
 }
