@@ -34,7 +34,7 @@ function has_value (tab, val)
 end
 
 function main_loop()
-    brackets = {}
+    local brackets = {}
     -- 
     brackets["furigana"] = {"(", ")"}
     brackets["okurigana"] = {"{","}"} -- allow user to omit
@@ -47,20 +47,20 @@ function main_loop()
     -- brackets["multikanji"] = {"‘","’"}
     -- brackets["unit"] = {"“","”"}
     -- 
-    left_brackets = {}
-    right_brackets = {}
+    local left_brackets = {}
+    local right_brackets = {}
     for k,v in pairs(brackets) do
         table.insert(left_brackets, v[1])
         table.insert(right_brackets, v[2])
     end
 
-    -- punctuation_str = "〻―・、，。…「」『』"
-    punctuation_str = "㆐〻―—・、，。…「」『』！？："
-    left_punctuation_str = "「『"
+    -- local punctuation_str = "〻―・、，。…「」『』"
+    local punctuation_str = "㆐〻―—・、，。…「」『』！？："
+    local left_punctuation_str = "「『"
 
-    lines_chars_table = {}
-    tex_kana_bool = token.create("g_kana_bool")
-    tex_true_bool = token.create("c_true_bool")
+    local lines_chars_table = {}
+    local tex_kana_bool = token.create("g_kana_bool")
+    local tex_true_bool = token.create("c_true_bool")
     for i,l in ipairs(verb_table) do
         split_line = {}
         for c in l:gmatch(utf8.charpattern) do
@@ -97,7 +97,7 @@ function main_loop()
         table.insert(lines_chars_table, split_line)
     end
 
-    annotated_lines_table = {}
+    local annotated_lines_table = {}
     for i,l in ipairs(lines_chars_table) do
         line = table.concat(l, "")
 
@@ -242,4 +242,36 @@ function main_loop()
 
     -- end loop in TeX
     directtex("\\continuefalse")
+end
+
+-- determine ichire kern
+function determine_ichire_kern()
+    local prev_kern = 0
+    local curr_kern = -10
+    
+    directtex("\\setkanbun{ichirekern="..tostring(approximate(curr_kern, prev_kern, ichire_untouched)/100).."}")
+
+    -- end loop in TeX
+    directtex("\\continuefalse")
+end
+
+function ichire_node_len(kerning)
+    directtex("\\kanbun@setichireboxkerning["..kerning.."]")
+    return node.length(tex.box["kanbun@ichirebox"].head)
+end
+
+function ichire_untouched(kern)
+    local no_touch_count = ichire_node_len(-100)
+    return ichire_node_len(kern) <= no_touch_count
+end
+
+function approximate(curr, prev, func)
+    while math.abs(prev-curr)>0.1 or func(prev) == func(curr) do
+        if func(prev) == func(curr) then
+            prev, curr = curr, curr + curr - prev
+        else
+            prev, curr = curr, (curr + prev)/2
+        end
+    end
+    return math.max(curr, prev)
 end
