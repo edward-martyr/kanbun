@@ -13,7 +13,7 @@
 % The Current Maintainer of this work is Yuanhao Chen.
 %
 % This work consists of the files kanbun.sty, kanbun.lua,
-% kanbun-example.tex and kanbun.tex.
+% kanbun-luatex.sty, kanbun-example.tex and kanbun.tex.
 % 
 \NeedsTeXFormat{LaTeX2e}[2021/06/01]
 \RequirePackage{expl3,xparse,l3keys2e,ifluatex}
@@ -21,6 +21,8 @@
     {\YEAR/\MONTH/\DAY} {\VERSION} {漢文の訓点文の組版}
 
 \ExplSyntaxOn
+\def \kanbun@msg #1 { \immediate \write16 { ^^J #1 ^^J } }
+
 \cs_generate_variant:Nn \str_if_eq:nnTF { V }
 \cs_generate_variant:Nn \str_case:nnTF { V }
 \cs_generate_variant:Nn \str_case:nnTF { f }
@@ -33,6 +35,7 @@
     \tl_set:Nn \kanbun_rubyfontcmd_default {}
     \tl_set:Nn \kanbun_fontcmd_default {}
 }
+\bool_set_false:N \kanbun_ichire
 
 % options
 \keys_define:nn { kanbun }
@@ -55,6 +58,10 @@
         , kumi .initial:n = { aki }
         , aki .code:n = \keys_set:nn { kanbun } { kumi = aki }
         , beta .code:n = \keys_set:nn { kanbun } { kumi = beta }
+        , ichire .bool_set:N = \kanbun_ichire
+        , ichire .default:n  = true
+        , ichirekern .fp_set:N = \kanbun_ichirekern
+        , ichirekern .initial:n = { -0.25 }
     }
 \ProcessKeysOptions { kanbun }
 \DeclareDocumentCommand \setkanbun { m } { 
@@ -67,7 +74,7 @@
 \newlength{\kanbun_okurilen}
 \newlength{\kanbun_furiokuri_firstline_len}
 \int_new:N \kanbun_furiokuri_firstline_start_index
-\tl_set:Nn \kanbun_tateten_width { 1/30 }
+\fp_set:Nn \kanbun_tateten_width { 1/30 }
 \tl_set:Nn \kanbunzwtosp { \fp_eval:n { \dim_ratio:nn { 1 \kanbun_zw } { 1 sp } } }
 \tl_set:Nn \kanbun_unit_glue { 
     \str_if_eq:VnTF \kanbun_kumi { aki } {
@@ -263,7 +270,7 @@
         \sys_if_engine_xetex:TF {} {
             \platex_if_direction_tate:TF {
                 \str_case:VnTF \kaeriten_output {
-                    { 一レ } { \tl_set:Nn \kaeriten_output { \kern \fp_eval:n {-0.25/\kanbun_scale}\kanbun_zw 一\kern \fp_eval:n {-0.75/\kanbun_scale}\kanbun_zw レ } }
+                    { 一レ } { \tl_set:Nn \kaeriten_output { \kern \fp_eval:n {\kanbun_ichirekern/\kanbun_scale}\kanbun_zw 一\kern \fp_eval:n {-(\kanbun_ichirekern+1)/\kanbun_scale}\kanbun_zw レ } }
                     { 甲レ } { \tl_set:Nn \kaeriten_output { 甲\kern \fp_eval:n {-0.25/\kanbun_scale}\kanbun_zw レ } }
                     { 上レ } { \tl_set:Nn \kaeriten_output { 上\kern \fp_eval:n {-0.25/\kanbun_scale}\kanbun_zw レ } }
                     { 天レ } { \tl_set:Nn \kaeriten_output { 天\kern \fp_eval:n {-0.25/\kanbun_scale}\kanbun_zw レ } }
@@ -347,43 +354,11 @@
 \ExplSyntaxOff
 % 
 \ifluatex
-% verbatim reader adapted from https://tex.stackexchange.com/a/361759
-\directlua{
-verb_table = {}
-function store_lines (str)
-    if string.find (str , "\noexpand\\EndKanbun" ) then
-        luatexbase.remove_from_callback (
-            "process_input_buffer" , "store_lines")
-        return "\\newif\\ifcontinue\\continuetrue\\directlua { co = coroutine.create(main_loop) }\\loop\\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\\ifcontinue\\repeat"
-    else
-        table.insert(verb_table, str)
-    end
-    return ""
-end
-function register_verbatim ()
-    verb_table = {}
-    luatexbase.add_to_callback(
-        "process_input_buffer" , store_lines , "store_lines")
-end
-% require main loop
-kanbunzwtosp = \luaescapestring{\kanbunzwtosp}
-require("kanbun.lua")
-}
-\def\Kanbun{\directlua{register_verbatim()}}
-\def\createcatcodes{%
-    \bgroup%
-        \catcode`\\=12 \catcode`\{=12 \catcode`\}=12%
-        \catcode`\$=12 \catcode`\&=12 \catcode`\^^M=13%
-        \catcode`\#=12 \catcode`\^=12 \catcode`\_=12%
-        \catcode`\ =13 \catcode`\~=12 \catcode`\%=12%
-        \savecatcodetable 1%
-    \egroup%
-}
-\createcatcodes
-\bgroup%
-    \catcode`\^^M=13\gdef^^M{\quitvmode\par}%
-    \catcode`\ = 13\gdef {\quitvmode\Space}%
-\egroup%
-\def\Space{ }
-% 
+\input kanbun-luatex.sty
+\else
+\ExplSyntaxOn
+\bool_if:NTF \kanbun_ichire { 
+    \PackageWarning{kanbun}{ichire~is~set~to~true,~but~LuaTeX~is~not~used.}
+} { }
+\ExplSyntaxOff
 \fi

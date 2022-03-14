@@ -13,7 +13,7 @@
 % The Current Maintainer of this work is Yuanhao Chen.
 %
 % This work consists of the files kanbun.sty, kanbun.lua,
-% kanbun-example.tex and kanbun.tex.
+% kanbun-luatex.sty, kanbun-example.tex and kanbun.tex.
 % 
 \documentclass[12pt]{ltxdockit}
 
@@ -326,8 +326,9 @@
 
     \cmditem{printkanbunnopar}
 
-    \en{The no-paragraph counterpart of \cmd{printkanbun}, which does not invoke \cmd{kanbunfont}, and uses \verb|\\| instead of \cmd{par}.}
-    \ja{\cmd{printkanbun} に対応する段落無しのバージョン。\cmd{kanbunfont}を使用せず、 \cmd{par} の代わりに \verb|\\| を使用する。}
+    \SaveVerb{newline}|\\|
+    \en{The no-paragraph counterpart of \cmd{printkanbun}, which does not invoke \cmd{kanbunfont}, and uses \UseVerb{newline} instead of \cmd{par}.}
+    \ja{\cmd{printkanbun} に対応する段落無しのバージョン。\cmd{kanbunfont}を使用せず、 \cmd{par} の代わりに \UseVerb{newline} を使用する。}
 
     \cmditem{printkanbunnoparcode}
 

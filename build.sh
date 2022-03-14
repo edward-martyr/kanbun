@@ -13,6 +13,8 @@ mkdir kanbun
 
 cp kanbun.sty kanbun/kanbun.sty
 cp kanbun.lua kanbun/kanbun.lua
+cp kanbun-luatex.sty kanbun/kanbun-luatex.sty
+cp outlinejfontpaths.lua kanbun/outlinejfontpaths.lua
 
 cp README.md kanbun/README.md
 

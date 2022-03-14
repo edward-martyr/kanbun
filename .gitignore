@@ -5,3 +5,5 @@
 *.toc
 *.ltjruby
 *.zip
+
+*-test.pdf

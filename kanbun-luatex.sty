@@ -1,0 +1,113 @@
+%% Copyright 2022 Yuanhao Chen
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Yuanhao Chen.
+%
+% This work consists of the files kanbun.sty, kanbun.lua,
+% kanbun-luatex.sty, kanbun-example.tex and kanbun.tex.
+%
+\def\kanbun@runcoroutine#1{\newif\ifcontinue\continuetrue\directlua{ co = coroutine.create(#1) }\loop\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\ifcontinue\repeat}
+% *process kanbun annotation
+% verbatim reader adapted from https://tex.stackexchange.com/a/361759
+\directlua{
+verb_table = {}
+function store_lines (str)
+    if string.find (str , "\noexpand\\EndKanbun" ) then
+        luatexbase.remove_from_callback (
+            "process_input_buffer" , "store_lines")
+        return "\\autosetichirekern\\makeatletter\\kanbun@runcoroutine{main_loop}\\makeatother"
+    else
+        table.insert(verb_table, str)
+    end
+    return ""
+end
+function register_verbatim ()
+    verb_table = {}
+    luatexbase.add_to_callback(
+        "process_input_buffer" , store_lines , "store_lines")
+end
+% require main loop
+kanbunzwtosp = \luaescapestring{\kanbunzwtosp}
+require("kanbun.lua")
+}
+\def\Kanbun{\directlua{register_verbatim()}}
+\def\createcatcodes{%
+    \bgroup%
+        \catcode`\\=12 \catcode`\{=12 \catcode`\}=12%
+        \catcode`\$=12 \catcode`\&=12 \catcode`\^^M=13%
+        \catcode`\#=12 \catcode`\^=12 \catcode`\_=12%
+        \catcode`\ =13 \catcode`\~=12 \catcode`\%=12%
+        \savecatcodetable 1%
+    \egroup%
+}
+\createcatcodes
+\bgroup%
+    \catcode`\^^M=13\gdef^^M{\quitvmode\par}%
+    \catcode`\ = 13\gdef {\quitvmode\Space}%
+\egroup%
+\def\Space{ }
+% 
+% *process 一レ kerning
+\ExplSyntaxOn
+\DeclareDocumentCommand{\kanbun@ichiretruefalsecode}{ m m }{
+    \bool_if:NTF \kanbun_ichire { #1 } { #2 }
+}
+\ExplSyntaxOff
+% with reference to https://tex.stackexchange.com/a/451951
+\kanbun@ichiretruefalsecode {
+    % 
+    \directlua{require("outlinejfontpaths.lua")}
+    % 
+    \RequirePackage{luamplib}
+    \mplibsetformat{metafun}
+    \everymplib{beginfig(0);}
+    \everyendmplib{endfig;}
+    % 
+    \edef\letterhash{\string#}
+    \def\mpdefineoutlines#1#2{\directlua{
+        local char = "\luaescapestring{#2}"
+        local outlines = outlinejfontpaths("#1")
+        local len = \letterhash outlines
+        tex.print("path " .. char .. "[];")
+        tex.print(char .. "n := " .. len .. ";")
+        for i, path in ipairs(outlines) do
+            tex.print(char .. "[" .. i .. "] := " .. path .. ";")
+        end
+    }}
+    % 
+    \newbox\kanbun@ichirebox
+    \DeclareDocumentCommand{\kanbun@setichireboxkerning}{ O{-100} }{
+        \setbox\kanbun@ichirebox\hbox{
+        \begin{mplibcode}
+        pair shift; shift := (0pt,#1pt);
+        \mpdefineoutlines{一}{ICHI}
+        \mpdefineoutlines{レ}{REI}
+        path r;
+        numeric n; n := 0;
+        r := ICHI[1];
+        forever:
+            pair q;
+            r := r cutbefore (reverse REI[1] shifted (shift) );
+            exitif length cuttings = 0;
+            r := subpath(epsilon, length r) of r;
+            q = point 0 of r;
+            n := n + 1;
+            drawdot(q);
+        endfor;
+        \end{mplibcode}
+        }
+    }
+    % 
+    \DeclareDocumentCommand{\autosetichirekern}{}{\makeatletter\kanbun@runcoroutine{determine_ichire_kern}\makeatother}
+}   {
+    \DeclareDocumentCommand{\autosetichirekern}{}{}
+}

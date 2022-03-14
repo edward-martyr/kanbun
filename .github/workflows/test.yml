@@ -1,7 +1,7 @@
 name: Build LaTeX document for testing kanbun
 on: [push]
 jobs:
-  build_latex:
+  build_lualatex_w_ichire:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
@@ -9,6 +9,25 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: test.tex
+          root_file: lualatex_w_ichire-test.tex
           latexmk_use_lualatex: true
-
+  build_lualatex_wo_ichire:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: lualatex_wo_ichire-test.tex
+          latexmk_use_lualatex: true
+  build_xelatex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: xelatex-test.tex
+          latexmk_use_xelatex: true
