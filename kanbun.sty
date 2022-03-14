@@ -392,5 +392,65 @@ require("kanbun.lua")
 \egroup%
 \def\Space{ }
 % 
-
+% *process 一レ点
+\makeatletter
+\ExplSyntaxOn
+\DeclareDocumentCommand{\kanbun@ichiretruecode}{ m }{
+    \bool_if:NTF \kanbun_ichire { #1 } { }
+}
+\ExplSyntaxOff
+% with reference to https://tex.stackexchange.com/a/451951
+\kanbun@ichiretruecode {
+    % 
+    \directlua{require("outlinejfontpaths.lua")}
+    % 
+    \RequirePackage{luamplib}
+    \mplibsetformat{metafun}
+    \everymplib{beginfig(0);}
+    \everyendmplib{endfig;}
+    % 
+    \edef\letterhash{\string#}
+    \def\mpdefineoutlines#1#2{\directlua{
+        local char = "\luaescapestring{#2}"
+        local outlines = outlinejfontpaths("#1")
+        local len = \letterhash outlines
+        tex.print("path " .. char .. "[];")
+        tex.print(char .. "n := " .. len .. ";")
+        for i, path in ipairs(outlines) do
+            tex.print(char .. "[" .. i .. "] := " .. path .. ";")
+        end
+    }}
+    % 
+    \newbox\kanbun@ichirebox
+    \DeclareDocumentCommand{\kanbun@setichireboxkerning}{ O{-100} }{
+        \setbox\kanbun@ichirebox\hbox{
+        \begin{mplibcode}
+        pair shift; shift := (0pt,#1pt);
+        \mpdefineoutlines{一}{ICHI}
+        \mpdefineoutlines{レ}{REI}
+        path r;
+        numeric n; n := 0;
+        r := ICHI[1];
+        forever:
+            pair q;
+            r := r cutbefore (reverse REI[1] shifted (shift) );
+            exitif length cuttings = 0;
+            r := subpath(epsilon, length r) of r;
+            q = point 0 of r;
+            n := n + 1;
+            drawdot(q);
+        endfor;
+        \end{mplibcode}
+        }
+    }
+    % 
+    \newif\ifcontinue\continuetrue\directlua{ co = coroutine.create(determine_ichire_kern) }\loop\directlua{ ok,b=coroutine.resume(co) tex.sprint(b) }\ifcontinue\repeat
+}
+\makeatother
+\else
+\makeatletter
+\kanbun@ichiretruecode {
+    \PackageWarning{kanbun}{"ichire is set to true, but LuaTeX is not used."}
+}
+\makeatother
 \fi
